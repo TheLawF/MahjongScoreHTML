@@ -88,11 +88,11 @@
     <br>
     <br>
     <label style="font-family: 黑体,serif;font-size: xx-large" for="cards">玩家手牌：</label>
-    <input type="text" id="cards" style="font-family: 黑体,serif;font-size: xx-large; width: 500px; height: 60px">
+    <input type="text" id="cards" style="font-family: 黑体,serif;font-size: xx-large; width: 660px; height: 60px">
     <button style="font-family: 黑体,serif;font-size: xx-large" onclick="clearCards('cards')">清除手牌</button>
     <br>
     <label style="font-family: 黑体,serif;font-size: xx-large" for="calls">玩家鸣牌：</label>
-    <input type="text" id="calls" style="font-family: 黑体,serif;font-size: xx-large; width: 500px; height: 60px">
+    <input type="text" id="calls" style="font-family: 黑体,serif;font-size: xx-large; width: 660px; height: 60px">
     <button style="font-family: 黑体,serif;font-size: xx-large" onclick="clearCards('calls')">清除手牌</button>
   </label>
 </p>
@@ -249,7 +249,7 @@
         mahjong.forEach(e => {
           if (e === str) {
             let cardsTab = document.getElementById("cards");
-            cardsTab.value = cardsTab.value + " " + str;
+            cardsTab.value = cardsTab.value + str;
           }
         });
         card_groups.normal.push(str);
@@ -337,7 +337,7 @@
         mahjong.forEach(e => {
           if (e === str) {
             let cardsTab = document.getElementById("cards");
-            cardsTab.value = cardsTab.value + " " + str;
+            cardsTab.value = cardsTab.value + str;
           }
         });
         card_groups.normal.push(str);
