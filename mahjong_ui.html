@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>日麻算符</title>
+</head>
+<body>
+<br>
+<br>
+<br>
+<br>
+<br>
+<p>
+    <label style="font-family: 微软雅黑,serif;font-size: xx-large">请选择规则*：</label>
+    <label style="font-family: 黑体,serif;font-size: xx-large">
+        <input type="radio" id="four_players" style="font-family: 黑体, sans-serif; font-size: xx-large"
+               name="player_select" onchange="getFourPlayers()">
+        四人麻将
+    </label>
+    <label style="font-family: 黑体,serif;font-size: xx-large">
+        <input type="radio" id="three_players" style="font-family: 黑体, sans-serif; font-size: xx-large"
+               name="player_select" onchange="getThreePlayers()">
+        三人麻将
+    </label>
+</p>
+<p>
+    <label style="font-family: 微软雅黑,serif;font-size: xx-large">请输入番数*：</label>
+    <label>
+        <input type="text" id="cards" style="font-family: 黑体,serif;font-size: x-large">
+    </label>
+</p>
+<p>
+    <label style="font-family: 微软雅黑,serif;font-size: xx-large">请输入符数：</label>
+    <label>
+        <input type="text" id="dora_count" style="font-family: 黑体,serif;font-size: x-large">
+    </label>
+</p>
+<br>
+<br>
+<label style="font-family: 黑体,serif;font-size: xx-large">亲家或者子家*：</label>
+<form id="is_banker_form">
+    <label style="font-family: 黑体,serif;font-size: xx-large">
+        <input name="is_banker" type="radio" onchange="isBankerButtonClicked()">
+        亲家
+    </label>
+    <label style="font-family: 黑体,serif;font-size: xx-large">
+        <input name="is_banker" type="radio" onchange="notBankerButtonClicked()">
+        子家
+    </label>
+</form>
+<p></p>
+<label style="font-family: 黑体,serif;font-size: xx-large">自摸或荣和*：</label>
+<form id="is_zimo_form">
+    <label style="font-family: 黑体,serif;font-size: xx-large">
+        <input name="is_zimo" value="zimo" type="radio" onclick="isZimoButtonClicked()">
+        自摸
+
+    </label>
+    <label style="font-family: 黑体,serif;font-size: xx-large">
+        <input name="is_zimo" value="not_zimo" type="radio" onclick="notZimoButtonClicked()">
+        荣和
+    </label>
+</form>
+
+<label style="font-family: 黑体,serif;font-size: xx-large"></label>
+<button style="font-family: 黑体,serif;font-size: xx-large" onclick="countScore()">计算</button>
+</body>
+<script>
+
+    // 手牌的格式化方法：除开一般规则之外，如果手牌中有吃碰杠，则将吃碰杠牌按照'>'的方式进行分分隔
+    // '>'表示将其右边的牌作为吃碰杠，同种花色下的不同吃碰杠之间使用空格进行分隔，分隔后称为一个组，共有吃牌组，碰牌组，明杠组和暗杠组
+    // '<'表示格式化吃碰杠的结束
+    // 特别地，为了区分明杠与暗杠，规定：如果每一个组当中有四个字符且其中只要存在一个字符0，则将该组定义为暗杠组
+    // 例一：222>345p>222s>4444m77z 表示三个一饼的暗刻，三四五饼的吃牌，三个二条的碰，四个四万的大明杠以及一对红中的雀头
+    // 例二：11p>222 333 678p 0444z 表示一对一饼，二三饼的碰牌组和一个北风的暗杠组
+    // 例三：22p234s>345s 555p 222m 表示一对二饼，234，345索的吃牌组，555饼和222万的碰牌组
+    // 例四：>123s 789m 789p 789s<11p
+    let cards = document.getElementById("cards").value;
+    let dora_count = parseInt(document.getElementById("dora_count").value);
+
+    let regex = /(\d+)([mspz]|$)/g;
+
+    let arr = Array.from(cards.matchAll(regex));
+    let cardMaps = [];
+    let $obj;
+    $obj = {a:""};
+
+    arr.forEach(e => cardMaps.push({number: parseInt(e[1]), suit: e[2]}));
+    cardMaps.forEach(e => console.log(e));
+
+    const lantern = [1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9];
+    const green = ['2','3','4','6','8','6z'];
+    const number = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const character = [1, 2, 3, 4, 5, 6, 7];
+
+    let isBanker;
+    let isZimo;
+    let player_count;
+
+    function getFourPlayers () {
+        player_count = 4;
+    }
+
+    function getThreePlayers() {
+        player_count = 3;
+    }
+
+    function isBankerButtonClicked() {
+        isBanker = true;
+
+    }
+
+    function notBankerButtonClicked() {
+        isBanker = false;
+    }
+
+    function isZimoButtonClicked() {
+        isZimo = true;
+    }
+
+    function notZimoButtonClicked() {
+        isZimo = false;
+    }
+
+    function startsWith(str, format) {
+        return str.charAt(1) === format;
+    }
+
+    function separate(str, suit) {
+        let cardCollections = {
+            flushes: [],
+            triplets: [],
+            pairs: [],
+            gang: []
+        }
+
+    }
+
+    function separateGroup(str) {
+        if (startsWith(str, ">")) {
+            if (str.contains(" ")) {
+
+            }
+        }
+    }
+
+    function separateCollection(str) {
+
+    }
+
+    function countDoubling() {
+
+    }
+
+    function countScore() {
+
+        let doubling = parseInt(document.getElementById("cards").value);
+        let talisman = parseInt(document.getElementById("dora_count").value);
+
+        // 当番数小于四时的情况
+        if (doubling <= 4) {
+
+            let unitScore = talisman * Math.pow(2, 2 + doubling);
+            let score = unitScore;
+
+
+            // 先判断是否是亲家自摸
+            if (isBanker) {
+                if (isZimo) {
+
+                    score *= 2;
+                    let score1 = score;
+                    if (score % 100 !== 0) {
+                        score = score - (score % 100) + 100;
+                    }
+                    if (score * 3 >= 8000) {
+                        document.write("亲家" + 12000 + "点" +
+                            "<br>每人支付：" + 4000);
+
+                    } else {
+                        score1 *= 3;
+                        if (score1 % 100 !== 0) {
+                            score1 = score1 - (score1 % 100) + 100;
+                        }
+                        document.write("亲家" + score1 + "点" +
+                            "<br>每人支付：" + score + "点");
+                    }
+                }
+                // 这里判断亲家荣和
+                else {
+                    score *= 6;
+                    if (score % 100 !== 0) {
+                        score = score - (score % 100) + 100;
+                    }
+                    if (doubling >= 3 && score >= 12000) {
+                        document.write("亲家" + 12000 + "" +
+                            "<br>放铳者支付：" + 12000)
+
+                    } else {
+                        document.write("放铳者支付：" + score + "点");
+                    }
+                }
+            }
+            // 开始判断子家是否自摸
+            else {
+                if (isZimo) {
+                    let scoreB = 2 * unitScore;
+                    let score1 = score;
+                    let score2 = scoreB;
+                    let score3 = 0;
+
+                    score3 += score1;
+                    score3 *= 2;
+                    score3 += score2;
+
+                    if (score % 100 !== 0) {
+                        score = score - (score % 100) + 100;
+                        scoreB = scoreB - (scoreB % 100) + 100;
+                    }
+
+                    if (doubling >= 3 && score3 >= 8000) {
+                        document.write("自摸子家满贯" + 8000 + "点" +
+                            "<br>亲家支付：" + 4000 + "点" +
+                            "<br>子家支付：" + 2000 + "点");
+                    } else {
+                        if (score1 % 100 !== 0) {
+                            score1 = score1 - (score1 % 100) + 100;
+                            score2 = score2 - (score2 % 100) + 100;
+                            score3 = score3 - (score3 % 100) + 100;
+                        }
+                        document.write("自摸子家" + score3 + "点" +
+                            "<br>亲家支付：" + score2 + "点" +
+                            "<br>子家支付：" + score1 + "点");
+                    }
+
+                } else {
+                    score *= 4;
+                    score = score - (score % 100) + 100;
+                    if (doubling >= 3 && score >= 8000) {
+                        document.write("自摸子家满贯" + 8000 + "点" +
+                            "<br>放铳者支付：" + 8000 + "点");
+                    } else {
+                        document.write("放铳者支付：" + score + "点");
+                    }
+
+                }
+            }
+        } else if (doubling === 5) {
+            var scoreB;
+            let unitScore = 2000;
+            let scoreBanker = 2 * unitScore;
+            let score = unitScore;
+
+            if (isBanker) {
+                if (isZimo) {
+                    score *= 2;
+                    document.write("亲家" + score * 3 + "点" +
+                        "<br>每人支付：" + score + "点");
+
+                } else {
+                    score *= 6;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            } else {
+                if (isZimo) {
+                    scoreBanker = 2 * unitScore;
+                    scoreB = scoreBanker;
+
+                    scoreB = scoreB - (scoreB % 100) + 100;
+                    document.write("自摸子家" + unitScore * 4 + "点" +
+                        "<br>亲家支付：" + scoreB + "点" +
+                        "点<br>子家支付：" + score + "点");
+
+                } else {
+                    score *= 4;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            }
+        } else if (doubling === 6 || doubling === 7) {
+            let unitScore = 3000;
+            let scoreBanker = 2 * unitScore;
+            let score = unitScore;
+
+            if (isBanker) {
+                if (isZimo) {
+                    score *= 2;
+                    document.write("亲家" + score * 3 + "点，" +
+                        "<br>每人支付：" + score + "点");
+
+                } else {
+                    score *= 6;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            } else {
+                if (isZimo) {
+                    scoreBanker = 2 * unitScore;
+                    scoreB = scoreBanker;
+
+                    scoreB = scoreB - (scoreB % 100) + 100;
+                    document.write("自摸子家" + unitScore * 4 + "点" +
+                        "<br>亲家支付：" + scoreB + "点" +
+                        "<br>子家支付：" + score + "点");
+
+                } else {
+                    score *= 4;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            }
+        } else if (doubling > 7 && doubling < 11) {
+            let unitScore = 4000;
+            let scoreBanker = 2 * unitScore;
+            let score = unitScore;
+
+            if (isBanker) {
+                if (isZimo) {
+                    score *= 2;
+                    document.write("亲家" + score * 3 + "点，" +
+                        "<br>每人支付：" + score + "点");
+
+                } else {
+                    score *= 6;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            } else {
+                if (isZimo) {
+                    scoreBanker = 2 * unitScore;
+                    scoreB = scoreBanker;
+
+                    scoreB = scoreB - (scoreB % 100) + 100;
+                    document.write("自摸子家" + unitScore * 4 + "点" +
+                        "<br>亲家支付：" + scoreB + "点" +
+                        "<br>子家支付：" + score + "点");
+
+                } else {
+                    score *= 4;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            }
+        } else if (doubling === 11 || doubling === 12) {
+            let unitScore = 6000;
+            let scoreBanker = 2 * unitScore;
+            let score = unitScore;
+
+            if (isBanker) {
+                if (isZimo) {
+                    score *= 2;
+                    document.write("亲家" + score * 3 + "点" +
+                        "<br>每人支付：" + score + "点");
+
+                } else {
+                    score *= 6;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            } else {
+                if (isZimo) {
+                    scoreBanker = 2 * unitScore;
+                    scoreB = scoreBanker;
+
+                    scoreB = scoreB - (scoreB % 100) + 100;
+                    document.write("自摸子家" + unitScore * 4 + "点" +
+                        "<br>亲家支付：" + scoreB + "点" +
+                        "<br>子家支付：" + score + "点");
+
+                } else {
+                    score *= 4;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            }
+        } else if (doubling === 13) {
+            let unitScore = 8000;
+            let scoreBanker = 2 * unitScore;
+            let score = unitScore;
+
+            if (isBanker) {
+                if (isZimo) {
+                    score *= 2;
+                    document.write("亲家" + score * 3 + "点，" +
+                        "<br>每人支付：" + score + "点");
+
+                } else {
+                    score *= 6;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            } else {
+                if (isZimo) {
+                    scoreBanker = 2 * unitScore;
+                    scoreB = scoreBanker;
+
+                    scoreB = scoreB - (scoreB % 100) + 100;
+                    document.write("自摸子家" + unitScore * 4 + "点" +
+                        "<br>亲家支付：" + scoreB + "点" +
+                        "<br>子家支付：" + score + "点");
+
+                } else {
+                    score *= 4;
+                    document.write("放铳者支付：" + score + "点");
+                }
+            }
+        }
+    }
+
+</script>
+</html>

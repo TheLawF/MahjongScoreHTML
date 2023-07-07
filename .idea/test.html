@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+
+</style>
+<body>
+
+</body>
+<script>
+    //
+    let str = "111p234s33344z"
+    let regex = /(\d+)([mspz]|$)/g;
+
+    let arr = Array.from(str.matchAll(regex));
+    let cardMaps = [];
+
+    arr.forEach(e => cardMaps.push({number: parseInt(e[1]), suit: e[2]}));
+    cardMaps.forEach(e => console.log(e));
+
+</script>
+</html>
